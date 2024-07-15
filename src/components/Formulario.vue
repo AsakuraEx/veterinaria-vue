@@ -36,9 +36,9 @@
         }
     );
 
-    defineEmits([
+    const emit = defineEmits([
         'update:nombre', 'update:propietario', 'update:email',
-        'update:alta', 'update:sintomas'
+        'update:alta', 'update:sintomas', 'guardar-paciente'
     ]);
 
     const alerta = reactive({
@@ -53,10 +53,11 @@
         alerta.tipo = 'error';
         return
       } else{
+        emit('guardar-paciente');
         alerta.mensaje = 'Guardado correctamente';
         alerta.tipo = 'exito';
       } 
-      console.log("Agregando...");
+
     }
 
 </script>

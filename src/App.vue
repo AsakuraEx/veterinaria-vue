@@ -13,6 +13,10 @@
         sintomas: ''
     });
 
+    const guardarPaciente = () => {
+        pacientes.value.push(paciente);
+    }
+
 </script>
 
 <template>
@@ -28,6 +32,7 @@
         v-model:email="paciente.email"
         v-model:alta="paciente.alta"
         v-model:sintomas="paciente.sintomas"
+        @guardar-paciente="guardarPaciente"
       />
 
       <div
@@ -46,7 +51,7 @@
           class="font-normal text-2xl mt-20"
         >
             No hay pacientes
-            {{ paciente.nombre }}
+
         </p>
 
       </div>
