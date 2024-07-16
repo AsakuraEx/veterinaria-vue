@@ -1,17 +1,23 @@
 <script setup>
 
-  import { ref, reactive } from 'vue';
+  import { ref, reactive, watch, onMounted } from 'vue';
   import { uid } from 'uid'
 
   import Header from './components/Header.vue';
   import Formulario from './components/Formulario.vue'
   import Paciente from './components/Paciente.vue'
 
+    onMounted(()=>{
+      const pacientesStorage = localStorage.getItem('pacientes');
+      if(pacientesStorage){
+        pacientes.value = JSON.parse(pacientesStorage);
+      }
+    });
 
-  const pacientes = ref([]);
+  const pacientes = ref([]);                      //Se define un array que contenga todos los pacientes reactivos
 
-  const paciente = reactive({
-        id: uid(),
+  const paciente = reactive({                     //Se define un objeto paciente reactivo
+        id: null,
         nombre: '',
         propietario: '',
         email: '',
@@ -19,25 +25,51 @@
         sintomas: ''
     });
 
-    const guardarPaciente = () => {
-        pacientes.value.push({
-          ...paciente //genera una copia
-        });
+    const guardarLocalStorage = () => {
+      localStorage.setItem('pacientes', JSON.stringify(pacientes.value));
+    }
 
-        Object.assign(paciente, {
-          id: uid(),
+    watch(pacientes, ()=>{
+      guardarLocalStorage()
+    },{
+      deep: true
+    });
+
+    const guardarPaciente = () => {
+        
+      if(paciente.id){                            //Evalua si el paciente tiene un id, si no tiene id (null) es nuevo, sino es antiguo
+        const { id } = paciente;                  //Se deconstruye el objeto y se genera una variable con el valor de paciente.id
+        const i = pacientes.value.findIndex((pacienteState) => pacienteState.id === id);    //Se encuentra el index basado en la condicion
+        pacientes.value[i] = {...paciente}      //Se guarda la copia del paciente en la posicion encontrada
+      }else{                                        //Si es nuevo
+        pacientes.value.push({                    //Guarda al final del arreglo una copia del paciente y asigna un id
+          ...paciente,
+          id: uid() //genera una copia
+        });
+      }
+
+
+        Object.assign(paciente, {               //Se limpian los campos del formulario
           nombre: '',
           propietario: '',
           email: '',
           alta: '',
-          sintomas: ''
+          sintomas: '',
+          id: null
         })
     }
 
     const actualizarPaciente = (id) => {
-      const pacienteEditar = pacientes.value.filter(paciente => paciente.id === id)[0]; //Busca el paciente que coincida con el id evaluado en filter, devuelve un nuevo array
+      const pacienteEditar = pacientes.value.filter(pacienteState => pacienteState.id === id)[0]; //Busca el paciente que coincida con el id evaluado en filter, devuelve un nuevo array
       Object.assign(paciente,pacienteEditar); //se asigna al paciente reactivo los valores del pacienteEditar
     }
+
+    const eliminarPaciente = (id) => {
+      pacientes.value = pacientes.value.filter(pacienteState => pacienteState.id !== id);
+    };
+
+
+
 
 </script>
 
@@ -55,6 +87,7 @@
         v-model:alta="paciente.alta"
         v-model:sintomas="paciente.sintomas"
         @guardar-paciente="guardarPaciente"
+        :id="paciente.id"
       />
 
       <div class="md:w-1/2 md:h-screen overflow-y-scroll">
@@ -69,6 +102,7 @@
             v-for="paciente in pacientes"
             :paciente="paciente"
             @actualizar-paciente="actualizarPaciente"
+            @eliminar-paciente="eliminarPaciente"
           />
 
         </div>
