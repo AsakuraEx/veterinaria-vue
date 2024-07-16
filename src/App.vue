@@ -34,6 +34,11 @@
         })
     }
 
+    const actualizarPaciente = (id) => {
+      const pacienteEditar = pacientes.value.filter(paciente => paciente.id === id)[0]; //Busca el paciente que coincida con el id evaluado en filter, devuelve un nuevo array
+      Object.assign(paciente,pacienteEditar); //se asigna al paciente reactivo los valores del pacienteEditar
+    }
+
 </script>
 
 <template>
@@ -63,6 +68,7 @@
           <Paciente 
             v-for="paciente in pacientes"
             :paciente="paciente"
+            @actualizar-paciente="actualizarPaciente"
           />
 
         </div>
